@@ -40,21 +40,24 @@ app.get('/api/saidas', async (req, res) => {
 
     if (status === 'pendente') {
       rows = await queryAll(`
-        SELECT s.*, COUNT(d.id)::int as qtd_docs
+        SELECT s.*, COUNT(d.id)::int as qtd_docs,
+          (SELECT COUNT(*) FROM saidas WHERE id <= s.id) as numero
         FROM saidas s LEFT JOIN documentos d ON d.saida_id = s.id
         GROUP BY s.id HAVING COUNT(d.id) = 0
         ORDER BY s.data DESC
       `);
     } else if (status === 'ok') {
       rows = await queryAll(`
-        SELECT s.*, COUNT(d.id)::int as qtd_docs
+        SELECT s.*, COUNT(d.id)::int as qtd_docs,
+          (SELECT COUNT(*) FROM saidas WHERE id <= s.id) as numero
         FROM saidas s LEFT JOIN documentos d ON d.saida_id = s.id
         GROUP BY s.id HAVING COUNT(d.id) > 0
         ORDER BY s.data DESC
       `);
     } else {
       rows = await queryAll(`
-        SELECT s.*, COUNT(d.id)::int as qtd_docs
+        SELECT s.*, COUNT(d.id)::int as qtd_docs,
+          (SELECT COUNT(*) FROM saidas WHERE id <= s.id) as numero
         FROM saidas s LEFT JOIN documentos d ON d.saida_id = s.id
         GROUP BY s.id ORDER BY s.data DESC
       `);
@@ -83,7 +86,7 @@ app.get('/api/saidas/status', async (req, res) => {
 app.get('/api/saidas/:id', async (req, res) => {
   try {
     db = await getDb();
-    const saida = await queryOne('SELECT * FROM saidas WHERE id = $1', [req.params.id]);
+    const saida = await queryOne('SELECT s.*, (SELECT COUNT(*) FROM saidas WHERE id <= s.id) as numero FROM saidas s WHERE id = $1', [req.params.id]);
     if (!saida) return res.status(404).json({ error: 'Saída não encontrada' });
     saida.documentos = await queryAll('SELECT * FROM documentos WHERE saida_id = $1 ORDER BY created_at DESC', [req.params.id]);
     res.json(saida);
@@ -209,7 +212,8 @@ app.get('/api/relatorio', async (req, res) => {
     const { data_inicio, data_fim } = req.query;
 
     let sql = `
-      SELECT s.*, COUNT(d.id)::int as qtd_docs
+      SELECT s.*, COUNT(d.id)::int as qtd_docs,
+        (SELECT COUNT(*) FROM saidas WHERE id <= s.id) as numero
       FROM saidas s LEFT JOIN documentos d ON d.saida_id = s.id
     `;
     const params = [];

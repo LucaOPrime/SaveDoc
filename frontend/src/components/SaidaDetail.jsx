@@ -8,6 +8,7 @@ export default function SaidaDetail() {
   const [saida, setSaida] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -39,13 +40,17 @@ export default function SaidaDetail() {
     }
   }
 
+  function isPreviewable(doc) {
+    return doc.tipo.startsWith('image/') || doc.tipo === 'application/pdf';
+  }
+
   if (loading) return <p className="loading">Carregando...</p>;
   if (!saida) return <p className="empty">Saída não encontrada.</p>;
 
   return (
     <div className="saida-detail">
       <div className="detail-header">
-        <h2>Saída #{saida.id}</h2>
+        <h2>Saída #{saida.numero}</h2>
         <div className="detail-actions">
           <Link to={`/editar/${saida.id}`} className="btn">Editar</Link>
           <Link to="/" className="btn btn-secondary">Voltar</Link>
@@ -101,7 +106,13 @@ export default function SaidaDetail() {
             <tbody>
               {saida.documentos.map(doc => (
                 <tr key={doc.id}>
-                  <td>{doc.nome_original}</td>
+                  <td>
+                    {isPreviewable(doc) ? (
+                      <span className="doc-name" onClick={() => setPreviewDoc(doc)}>{doc.nome_original}</span>
+                    ) : (
+                      doc.nome_original
+                    )}
+                  </td>
                   <td>{doc.tipo}</td>
                   <td>{(doc.tamanho / 1024).toFixed(1)} KB</td>
                   <td>{doc.created_at}</td>
@@ -115,6 +126,27 @@ export default function SaidaDetail() {
           </table>
         )}
       </div>
+
+      {previewDoc && (
+        <div className="modal-overlay" onClick={() => setPreviewDoc(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span>{previewDoc.nome_original}</span>
+              <button onClick={() => setPreviewDoc(null)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              {previewDoc.tipo.startsWith('image/') ? (
+                <img src={previewDoc.url} alt={previewDoc.nome_original} />
+              ) : (
+                <iframe src={previewDoc.url} title={previewDoc.nome_original} />
+              )}
+            </div>
+            <div className="modal-actions">
+              <a href={previewDoc.url} target="_blank" className="btn btn-sm" download>Download</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
