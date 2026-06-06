@@ -48,9 +48,13 @@ export default function SaidaList() {
       </div>
 
       {loading ? (
-        <p className="loading">Carregando...</p>
+        <p className="loading">Carregando saídas...</p>
       ) : saidas.length === 0 ? (
-        <p className="empty">Nenhuma saída encontrada.</p>
+        <div className="empty">
+          <div className="empty-icon"></div>
+          <p style={{ fontWeight: 500, marginBottom: '0.25rem' }}>Nenhuma saída encontrada</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--gray-400)' }}>Crie uma nova saída para começar</p>
+        </div>
       ) : (
         <table>
           <thead>

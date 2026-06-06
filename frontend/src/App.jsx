@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import StatusSummary from './components/StatusSummary';
 import SaidaList from './components/SaidaList';
 import SaidaForm from './components/SaidaForm';
@@ -11,11 +11,11 @@ export default function App() {
     <BrowserRouter>
       <div className="app">
         <header className="app-header">
-          <Link to="/" className="app-logo">SaveDoc</Link>
+          <NavLink to="/" className="app-logo">SaveDoc</NavLink>
           <nav className="app-nav">
-            <Link to="/">Home</Link>
-            <Link to="/nova">Nova Saída</Link>
-            <Link to="/relatorio">Relatório</Link>
+            <NavLink to="/" end className={({ isActive }) => isActive ? 'ativo' : ''}>Home</NavLink>
+            <NavLink to="/nova" className={({ isActive }) => isActive ? 'ativo' : ''}>Nova Saída</NavLink>
+            <NavLink to="/relatorio" className={({ isActive }) => isActive ? 'ativo' : ''}>Relatório</NavLink>
           </nav>
         </header>
         <main className="app-main">

@@ -138,7 +138,10 @@ export default function SaidaDetail() {
               {previewDoc.tipo.startsWith('image/') ? (
                 <img src={previewDoc.url} alt={previewDoc.nome_original} />
               ) : (
-                <iframe src={previewDoc.url} title={previewDoc.nome_original} />
+                <iframe
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDoc.url)}&embedded=true`}
+                  title={previewDoc.nome_original}
+                />
               )}
             </div>
             <div className="modal-actions">
